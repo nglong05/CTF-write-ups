@@ -67,9 +67,11 @@ The output will be something like this:
 ```
 
 ![alt text](image/image-3.png)
+
 Notice that even though the channel is set to admin-only, we can still join it because we set it to false immediately after.
 
 Now, we can view the log of the admin login along with their password.
 
 Use that password to log in as an admin and retrieve the flag.
+
 ![alt text](image/image-4.png)
