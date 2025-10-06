@@ -47,7 +47,7 @@ def confirm_register():
 
 Ta tiến thành đăng ký một tài khoản mới với role là 1, lúc này ta đã có thể sử dụng route `/users/<uuid>`
 
-![](/home/nguyenlong05/.config/marktext/images/2025-10-05-11-16-19-image.png)
+![](images/Writeup_image1.png)
 
 **Lấy uuid của admin và xem thông tin admin**
 
@@ -65,25 +65,25 @@ Việc làm tiếp theo là cần leak uuid của admin. Ta thấy rằng uuid c
 
 Vậy, để leak uuid của admin ta chỉ cần đơn giản tạo một article rồi collab với admin, vấn đề là ta cần phải được người collab, tức admin chấp nhận yêu cầu collab. Ta tiếp tục khai thác lỗi tiếp theo, khi mà article uuid của ta được công khai kết hợp với việc `/collab/accept/<article-uuid>` không xác minh người dùng. Từ đó ta có thể thực hiện IDOR để chấp nhận article của chính mình collab với admin.
 
-![](/home/nguyenlong05/.config/marktext/images/2025-10-05-11-27-54-image.png)
+![](images/Writeup_image2.png)
 
 Sau khi lấy được articles collab với admin, thực hiện accept
 
-![](/home/nguyenlong05/.config/marktext/images/2025-10-05-11-29-57-image.png)
+![](images/Writeup_image3.png)
 
 Truy cập vào `/home` để xem các articles, ta lấy được uuid của admin:
 
-![](/home/nguyenlong05/.config/marktext/images/2025-10-05-11-31-50-image.png)
+![](images/Writeup_image4.png)
 
 Với role người dùng hiện tại là 1, ta thực hiện trích xuất thông tin của admin:
 
-![](/home/nguyenlong05/.config/marktext/images/2025-10-05-11-33-16-image.png)
+![](images/Writeup_image5.png)
 
 **flag**
 
 Sau khi thực hiện vào tài khoản admin, ta kéo file zip về và thực hiện forensic.
 
-![](/home/nguyenlong05/.config/marktext/images/2025-10-05-11-36-07-image.png)
+![](images/Writeup_image6.png)
 
 # Secrets
 
@@ -125,7 +125,7 @@ Ta nhận thấy rằng con bot thực hiện force 1 JWT của admin, sau đó 
 
 Với hint là CSRF, ta thực hiện phân tích các mã nguồn ejs có ích. Trong quá trình audit code, với kinh nghiệm của mình có thể nhận xét các route liên quan tới đăng kí/ đăng nhập và logic JWT chuẩn như sách giáo khoa. Từ đó ta đặt nghi vấn lên route `addAdmin` tại vì nó có quyền cung cấp admin và chức năng ghi log (chức năng có vẻ thừa thãi trong  chương trình).
 
-![](/home/nguyenlong05/.config/marktext/images/2025-10-05-12-22-59-image.png)
+![](images/Writeup_image7.png)
 
 Đây là một code snippet từ `profile.ejs` nằm trong script tag. Tại đây ta có thể chia quá trình hoạt động ra 2 phần khi truy cập vào `/user/profile?id=xxx`:
 
